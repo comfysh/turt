@@ -4,13 +4,15 @@ const path = require('node:path');
 require('dotenv').config();
 
 const commands = [];
-// Grab all the command files from the commands directory you created earlier
+// Get all slash function files from the commands directory
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
 for (const file of commandFiles) {
     const filePath = path.join(commandsPath, file);
+    // Get the export of each file
     const command = require(filePath);
+    // Make sure the necessary variables are present
     if ('data' in command && 'execute' in command) {
         commands.push(command.data.toJSON());
     } else {
@@ -21,12 +23,12 @@ for (const file of commandFiles) {
 // Construct and prepare an instance of the REST module
 const rest = new REST().setToken(process.env.TOKEN);
 
-// and deploy your commands!
+// Deployment process
 (async () => {
 	try {
 		console.log(`Started refreshing ${commands.length} application (/) commands.`);
 
-		// The put method is used to fully refresh all commands in the guild with the current set
+		// Refresh commands in existing servers
 		const data = await rest.put(
 			Routes.applicationCommands(process.env.CLIENT_ID),
 			{ body: commands },
@@ -34,7 +36,6 @@ const rest = new REST().setToken(process.env.TOKEN);
 
 		console.log(`Successfully reloaded ${data.length} application (/) commands.`);
 	} catch (error) {
-		// And of course, make sure you catch and log any errors!
 		console.error(error);
 	}
 })();
